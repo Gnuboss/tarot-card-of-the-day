@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tarot Card of the Day — Misterio Studios</title>
+  <meta name="description" content="A slot machine style game to draw a random tarot card of the day. By Misterio Studios." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0e0e12;
+      color: #e8e4dc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 560px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: #e8e4dc;
+      margin-bottom: 4px;
+    }
+
+    header p {
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #c9a84c;
+    }
+
+    .machine {
+      background: #16161e;
+      border: 0.5px solid #2e2e3a;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .reels {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .reel-outer {
+      flex: 1;
+      max-width: 160px;
+      height: 140px;
+      overflow: hidden;
+      border: 0.5px solid #2e2e3a;
+      border-radius: 10px;
+      background: #0e0e12;
+      position: relative;
+    }
+
+    .reel-inner {
+      position: absolute;
+      width: 100%;
+    }
+
+    .reel-inner.spinning {
+      animation: spin-blur 0.08s linear infinite;
+    }
+
+    .card-face {
+      height: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+    }
+
+    .card-symbol {
+      font-size: 36px;
+      margin-bottom: 6px;
+      line-height: 1;
+    }
+
+    .card-name {
+      font-size: 11px;
+      font-weight: 500;
+      color: #888;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+
+    .card-numeral {
+      font-size: 10px;
+      color: #555;
+      margin-top: 2px;
+    }
+
+    .wild-face .card-name { color: #c9a84c; }
+    .wild-face .card-numeral { color: #9a7a30; }
+
+    .payline {
+      height: 1px;
+      background: #c9a84c;
+      opacity: 0.4;
+      margin: 0 -1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .spin-btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      border: 0.5px solid #2e2e3a;
+      background: #1e1e28;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #e8e4dc;
+      letter-spacing: 0.04em;
+      transition: background 0.15s;
+    }
+
+    .spin-btn:hover { background: #26262e; }
+    .spin-btn:active { transform: scale(0.98); }
+    .spin-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+    .result-area {
+      min-height: 80px;
+      border: 0.5px solid #2e2e3a;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      background: #16161e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .result-idle {
+      color: #555;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .result-match { animation: fadeIn 0.4s ease; width: 100%; }
+
+    .result-card-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #e8e4dc;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: #2a2208;
+      color: #c9a84c;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .result-text {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.7;
+    }
+
+    .no-match {
+      color: #444;
+      font-size: 13px;
+      text-align: center;
+      font-style: italic;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 12px;
+      color: #333;
+    }
+
+    footer a {
+      color: #c9a84c;
+      text-decoration: none;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+
+    footer a:hover { opacity: 1; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin-blur {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-140px); }
+    }
+
+    @media (max-width: 420px) {
+      .reel-outer { height: 120px; }
+      .card-face { height: 120px; }
+      .card-symbol { font-size: 28px; }
+      @keyframes spin-blur {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-120px); }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <h1>Tarot Card of the Day</h1>
+    <p>Misterio Studios</p>
+  </header>
+
+  <div class="machine">
+    <div class="reels">
+      <div class="reel-outer"><div class="reel-inner" id="reel0"><div class="card-face" id="face0"><div class="card-symbol" id="sym0">🌙</div><div class="card-name" id="name0">The Moon</div><div class="card-numeral" id="num0">XVIII</div></div></div></div>
+      <div class="reel-outer"><div class="reel-inner" id="reel1"><div class="card-face" id="face1"><div class="card-symbol" id="sym1">☀️</div><div class="card-name" id="name1">The Sun</div><div class="card-numeral" id="num1">XIX</div></div></div></div>
+      <div class="reel-outer"><div class="reel-inner" id="reel2"><div class="card-face" id="face2"><div class="card-symbol" id="sym2">⚡</div><div class="card-name" id="name2">The Tower</div><div class="card-numeral" id="num2">XVI</div></div></div></div>
+    </div>
+    <div class="payline"></div>
+    <button class="spin-btn" id="spinBtn" onclick="spin()">Spin the Arcana</button>
+  </div>
+
+  <div class="result-area" id="resultArea">
+    <div class="result-idle">Spin to draw your card of the day</div>
+  </div>
+
+  <footer>
+    <a href="https://bronson.co.za" target="_blank" rel="noopener">bronson.co.za</a>
+  </footer>
+
+</div>
+
+<script>
+  const WILD = { name: "Wild", numeral: "★", sym: "🌟", isWild: true };
+
+  const CARDS = [
+    { name: "The Fool", numeral: "0", sym: "🌿", msg: "A leap into the unknown awaits. The Fool invites you to embrace new beginnings without fear. Trust that the universe will catch you — this is not recklessness, it is faith in motion." },
+    { name: "The Magician", numeral: "I", sym: "✦", msg: "All the tools you need are already in your hands. The Magician speaks of mastery, intention, and the alchemy of turning thought into reality. What will you manifest today?" },
+    { name: "The High Priestess", numeral: "II", sym: "🌊", msg: "Wisdom lives beneath the surface. The High Priestess asks you to trust your intuition and sit with what you know in your bones before seeking answers outside yourself." },
+    { name: "The Empress", numeral: "III", sym: "🌸", msg: "Abundance flows where attention goes. The Empress encourages you to nurture what is growing — in your work, your relationships, your creative life. Tend your garden." },
+    { name: "The Emperor", numeral: "IV", sym: "⚔️", msg: "Structure is not a cage — it is a foundation. The Emperor calls you to establish order, set clear boundaries, and lead with both authority and integrity." },
+    { name: "The Hierophant", numeral: "V", sym: "🗝️", msg: "There is wisdom in tradition, but wisdom in questioning it too. The Hierophant asks: which systems truly serve you, and which are you following out of habit?" },
+    { name: "The Lovers", numeral: "VI", sym: "♾️", msg: "A choice before you is more significant than it appears. The Lovers is not only about partnership — it is about alignment between your values and your actions." },
+    { name: "The Chariot", numeral: "VII", sym: "🏹", msg: "Victory belongs to those who can hold contradictions in motion. The Chariot asks you to harness opposing forces — will and surrender — and move forward with focused intent." },
+    { name: "Strength", numeral: "VIII", sym: "🦁", msg: "True strength is gentle. Today calls for patience, compassion, and the quiet courage that comes from knowing your own power without needing to display it." },
+    { name: "The Hermit", numeral: "IX", sym: "🕯️", msg: "The answers you seek are found in stillness. The Hermit invites withdrawal from noise — not isolation, but sacred solitude where your inner voice grows clear." },
+    { name: "Wheel of Fortune", numeral: "X", sym: "⭕", msg: "Nothing stays fixed. The Wheel of Fortune reminds you that cycles turn — what is rising and what is falling? Ride the wave rather than resist it." },
+    { name: "Justice", numeral: "XI", sym: "⚖️", msg: "What you put out returns. Justice asks you to examine your recent actions honestly and make any adjustments needed to bring your life back into balance." },
+    { name: "The Hanged Man", numeral: "XII", sym: "🌀", msg: "Surrender is not defeat. The Hanged Man calls you to pause, to see your situation from a radically different angle. The breakthrough comes through release." },
+    { name: "Death", numeral: "XIII", sym: "🥀", msg: "Something is ending to make way for transformation. Death does not ask you to mourn — it asks you to release what no longer serves with grace and gratitude." },
+    { name: "Temperance", numeral: "XIV", sym: "💧", msg: "Integration is the work. Temperance calls for patience, moderation, and the long craft of blending opposites into something refined and lasting." },
+    { name: "The Devil", numeral: "XV", sym: "🔗", msg: "Examine what binds you. The chains of The Devil are often ones you placed yourself — patterns, addictions, beliefs. You have more freedom than you think." },
+    { name: "The Tower", numeral: "XVI", sym: "⚡", msg: "What is built on false foundations must fall. The Tower is sudden and disruptive — but the clearing it creates is where something truer can grow." },
+    { name: "The Star", numeral: "XVII", sym: "✨", msg: "After the storm, renewal. The Star pours hope and healing into this moment. You are on the right path. Trust. Rest. Let yourself be restored." },
+    { name: "The Moon", numeral: "XVIII", sym: "🌙", msg: "Not everything is as it appears. The Moon illuminates the shadow — the fears, illusions, and unspoken truths. Tread carefully and trust your deeper instincts." },
+    { name: "The Sun", numeral: "XIX", sym: "☀️", msg: "Vitality, clarity, joy. The Sun asks nothing of you today except to shine. Let yourself be seen, play freely, and celebrate the life you are living." },
+    { name: "Judgement", numeral: "XX", sym: "📯", msg: "A reckoning — not punishment, but awakening. Judgement calls you to step into a truer version of yourself. The past has prepared you. Answer the call." },
+    { name: "The World", numeral: "XXI", sym: "🌍", msg: "Completion. Integration. Arrival. The World marks a cycle fulfilled. Honour what you have accomplished before turning toward the next beginning." }
+  ];
+
+  const DECK = [...CARDS, WILD];
+  let spinning = false;
+
+  function getRandom() { return DECK[Math.floor(Math.random() * DECK.length)]; }
+
+  function setReel(i, card) {
+    const face = document.getElementById('face' + i);
+    face.className = 'card-face' + (card.isWild ? ' wild-face' : '');
+    document.getElementById('sym' + i).textContent = card.sym;
+    document.getElementById('name' + i).textContent = card.name;
+    document.getElementById('num' + i).textContent = card.numeral;
+  }
+
+  function spin() {
+    if (spinning) return;
+    spinning = true;
+    const btn = document.getElementById('spinBtn');
+    btn.disabled = true;
+    btn.textContent = 'Spinning...';
+    document.getElementById('resultArea').innerHTML = '<div class="result-idle">Reading the arcana...</div>';
+
+    const reels = [document.getElementById('reel0'), document.getElementById('reel1'), document.getElementById('reel2')];
+    reels.forEach(r => r.classList.add('spinning'));
+
+    const stopTimes = [900, 1300, 1700];
+    const chosen = stopTimes.map(() => getRandom());
+
+    stopTimes.forEach((t, i) => {
+      setTimeout(() => {
+        reels[i].classList.remove('spinning');
+        setReel(i, chosen[i]);
+        if (i === 2) {
+          spinning = false;
+          btn.disabled = false;
+          btn.textContent = 'Spin Again';
+          showResult(chosen);
+        }
+      }, t);
+    });
+  }
+
+  function resolveCard(cards) {
+    const nonWilds = cards.filter(c => !c.isWild);
+    if (nonWilds.length === 0) return { card: CARDS[Math.floor(Math.random() * CARDS.length)], allWild: true };
+    const names = nonWilds.map(c => c.name);
+    const allSame = names.every(n => n === names[0]);
+    if (allSame) return { card: nonWilds[0], allWild: false };
+    return null;
+  }
+
+  function showResult(cards) {
+    const area = document.getElementById('resultArea');
+    const wildCount = cards.filter(c => c.isWild).length;
+    const resolved = resolveCard(cards);
+
+    if (resolved) {
+      const wildNote = wildCount > 0 ? ` <span class="badge">${wildCount === 3 ? '3 wilds' : wildCount + ' wild'}</span>` : '';
+      area.innerHTML = `<div class="result-match">
+        <div class="result-card-name">${resolved.card.sym} ${resolved.card.name}${wildNote} <span class="badge">Today's card</span></div>
+        <div class="result-text">${resolved.card.msg}</div>
+      </div>`;
+    } else {
+      area.innerHTML = `<div class="no-match">No match — spin again to draw your card of the day</div>`;
+    }
+  }
+</script>
+
+</body>
+</html>
